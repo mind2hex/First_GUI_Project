@@ -1,0 +1,17 @@
+1.- Mostrar inventario
+  -- Formato del inventario:
+  --- Producto, Descripcion, precio, cantidad y Codigo_de_producto
+
+2.- Modificar inventario
+  -- Cambiar Nombre del producto
+  -- Cambiar Descripcion de un producto
+  -- Cambiar precio de un Producto
+  -- Restar o aumentar cantidad de un producto
+
+3.- Agregar elemento al inventario
+  --
+
+4.- Eliminar elemento del inventario
+  --
+
+5.- Agregar sistema de actualizacion automatico
