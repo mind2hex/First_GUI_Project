@@ -17,7 +17,7 @@ def DB_CHECK():
 
     # Checking DATABASE file
     if pathlib.Path("./DATABASE/inventory.json").exists() == False:
-        pathlib.touch("./DATABASE/inventory.json")
+        pathlib.Path("./DATABASE/inventory.json").touch()
 
     # Checking DATABASE json format
     try:
