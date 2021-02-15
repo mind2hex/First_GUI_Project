@@ -4,6 +4,7 @@ import tkinter as tk
 import json
 import pathlib
 import update
+from platform import system as operative_system
 
 AUTHOR = "JOHAN | mind2hex"
 VERSION = "[v1.0]"
@@ -13,7 +14,12 @@ def DB_CHECK():
     # Checking DATABASE directory
     if pathlib.Path("./DATABASE").exists() == False:
         # Creating DATABASE if directory doesn't exist
-        pathlib.mkdir("./DATABASE")
+
+        if operative_system() == "Linux":
+            pathlib.mkdir("./DATABASE")
+
+        elif operative_system() == "Windows":
+            pathlib.Path("./DATABASE").mkdir()
 
     # Checking DATABASE file
     if pathlib.Path("./DATABASE/inventory.json").exists() == False:
@@ -146,7 +152,7 @@ class show_inventory_manager:
 
         self.label_title = [0, 1, 2, 3, 4, 5]
         self.counter     = 0
-        
+
         # Creating column titles
         for i,j in self.aux:
             self.label_title[self.counter] = tk.Label(self.title_frame, text=i, font="ARIAL", width=j,
@@ -154,21 +160,29 @@ class show_inventory_manager:
             self.label_title[self.counter].pack(side="left")
             self.counter += 1
 
-
+        self.aux        = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        self.info       = json.load(open("./DATABASE/inventory.json", "r"))
+        quantity = 0
+        lista = [0, 0, 0]
         # Extracting totals from pr1, pr2, pr3
-        
-        
+        for i in range(len(self.aux)):
+            for j in range(len(self.info[i][self.aux[i]])):
+                quantity = int(self.info[i][self.aux[i]][j][2])
+                lista[0] += (int(self.info[i][self.aux[i]][j][3]) * quantity)
+                lista[1] += (int(self.info[i][self.aux[i]][j][4]) * quantity)
+                lista[2] += (int(self.info[i][self.aux[i]][j][5]) * quantity)
+
         # Footer of the page
         self.inventory_footer_frame = tk.Frame(self.master)
         self.inventory_footer_frame.pack(side="bottom", fill=tk.X)
         width_list = [21, 22, 22]
         self.inventory_footer_label = [0, 0, 0]
+        counter = 2
         for i in range(3):
-            self.inventory_footer_label[i] = tk.Label(self.inventory_footer_frame, text="Hola mundo", relief="groove",
+            self.inventory_footer_label[i] = tk.Label(self.inventory_footer_frame, text=str(lista[counter]), relief="groove",
                                                       borderwidth=4, width=width_list[i])
             self.inventory_footer_label[i].pack(side="right")
-
-        
+            counter -= 1
 
         # list section
         self.list_frame = tk.Frame(self.master)
@@ -187,10 +201,8 @@ class show_inventory_manager:
             self.counter += 1
 
 
-        
+
         # inserting values from database to list
-        self.aux        = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        self.info       = json.load(open("./DATABASE/inventory.json", "r"))
         self.text_lines = ["", "", "", "", "", ""]
         self.counter    = 0
         for i in range(len(self.aux)):
@@ -199,8 +211,8 @@ class show_inventory_manager:
                     self.inventory_list[x].insert(tk.END, str(self.info[i][self.aux[i]][j][x]))
 
 
-                    
- 
+
+
     def yscroll1(self, *args):
         if self.inventory_list[1].yview() != self.inventory_list[0].yview():
             self.inventory_list[1].yview_moveto(args[0])
@@ -385,7 +397,7 @@ class add_inventory_manager:
                                     relief="groove", borderwidth=4, command=self.press_button, width=8,
                                     height=1)
         self.add_button.pack()
-        
+
     def press_button(self):
         """ function handler for add button """
 
@@ -396,7 +408,7 @@ class add_inventory_manager:
         tot1_val = self.tot1_entry.get()
         tot2_val = self.tot2_entry.get()
         tot3_val = self.tot3_entry.get()
-        
+
         lista = [(name_val, "NOMBRE"), (cant_val, "CANTIDAD"),
                  (tot1_val, "PRECIO LLEGADA"), (tot2_val, "PRECIO TALLERES"),
                  (tot3_val, "PRECIO PUBLICO")]
@@ -414,7 +426,7 @@ class add_inventory_manager:
                 self.error_label(f" Caracter invalido en: DESCRIPCION ")
                 status = False
                 return 0
-        
+
         for i,j in lista:
             if j in ["NOMBRE"]:
                 if len(i) == 0 or i.isspace() == True:
@@ -437,7 +449,7 @@ class add_inventory_manager:
                     status = False
                     break
 
-        
+
         if status == True:
             if self.check_repeated(name_val) == False:
                 self.add_entries_to_inventory(name_val, desc_val, cant_val,
@@ -449,13 +461,13 @@ class add_inventory_manager:
         """ Checkin for repeated names inside DB """
         info = json.load(open("./DATABASE/inventory.json","r"))
         aux = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        
+
         for i in info[aux.index(string[0].upper())][string[0].upper()]:
             if string.upper() in i:
                 return True
         else:
-            return False    
-            
+            return False
+
 
     def add_entries_to_inventory(self, name_val, desc_val, cant_val,
                                  tot1_val, tot2_val, tot3_val):
@@ -472,7 +484,7 @@ class add_inventory_manager:
             handler.write(to_write)
             self.error_label(f" [{name_val}] Agregado correctamente ")
 
-        
+
     def error_label(self, string):
         self.new_window = tk.Toplevel()
         self.error_lbl = tk.Label(self.new_window, text=string, font=("arial",12))
@@ -481,7 +493,7 @@ class add_inventory_manager:
         self.ok_button = tk.Button(self.new_window, text="ok", font=("arial",12), relief="groove",
                                    borderwidth=4, command=self.new_window.destroy)
         self.ok_button.pack()
-    
+
 class remove_inventory_manager:
     def __init__(self, master):
         """ Remove from inventory window manager """
@@ -510,7 +522,7 @@ class remove_inventory_manager:
         if len(data) == 0 or data.isspace == True:
             self.error_label(" No ha introducido nada ")
             status = False
-            
+
         elif data.isalnum() == False:
             self.error_label(" Ah introducido un valor incorrecto ")
             status = False
@@ -535,7 +547,7 @@ class remove_inventory_manager:
                 self.error_label(f" El elemento ({data.upper()}) no existe ")
                 return 0
 
-                
+
     def error_label(self, string):
         self.new_window = tk.Toplevel()
         self.error_lbl = tk.Label(self.new_window, text=string, font=("arial",12))
@@ -553,13 +565,13 @@ class update_manager:
         self.master.geometry("800x175")
         self.master.resizable(0,0)
 
-        self.label = tk.Label(self.master, font=("arial", 12), 
+        self.label = tk.Label(self.master, font=("arial", 12),
                               text=" Hay una actualizacion disponible, Desea actualizar el programa? ")
         self.label.pack()
 
         self.choice_frame = tk.Frame(self.master)
         self.choice_frame.pack()
-        
+
         self.negative_button = tk.Button(self.choice_frame, text="No, gracias", font=("arial",12),
                                          command=self.master.destroy)
         self.negative_button.pack()
@@ -567,10 +579,10 @@ class update_manager:
         self.affirmative_button = tk.Button(self.choice_frame, text="Si, por favor", font=("arial",12),
                                             command=self.affirmative_update)
         self.affirmative_button.pack()
-        
+
     def affirmative_update(self):
         update.update_repo()
-        
+
 
 def main():
     DB_CHECK()
