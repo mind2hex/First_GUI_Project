@@ -3,7 +3,7 @@
 import tkinter as tk
 import json
 import pathlib
-
+import update
 
 AUTHOR = "JOHAN | mind2hex"
 VERSION = "[v1.0]"
@@ -84,15 +84,12 @@ class MOTOGP_DATABASE:
 
         # Search section
         self.search_frame = tk.Frame(bg="black")
-
-        self.button_search = tk.Button(self.search_frame, text=" Buscar ", font="arial",
-        relief="flat", command= lambda: search_string(self.entry_search.get()))
+        self.button_search = tk.Button(self.search_frame, text=" Buscar ", font="arial", relief="flat",
+                                       command= lambda: search_string(self.entry_search.get()))
         self.button_search.pack(side="right")
-
-        self.entry_search  = tk.Entry(self.search_frame, font="arial", justify="left", width=30,
-        bd=5)
+        self.entry_search  = tk.Entry(self.search_frame, font="arial", justify="left",
+                                      width=30, bd=5)
         self.entry_search.pack(side="right")
-
         self.search_frame.pack(side="top", fill=tk.X)
 
         # Inventory section
@@ -101,25 +98,22 @@ class MOTOGP_DATABASE:
                                                font="arial", command=self.show_inventory,
                                                width=30, height=2)
         self.button_show_inventory.pack()
-
-        self.button_modify_inventory = tk.Button(self.main_frame, text="Modificar Inventario",
-                                                 font="arial", width=30, height=2)
-        self.button_modify_inventory.pack()
-
         self.button_add_to_inventory = tk.Button(self.main_frame, text="Agregar al inventario",
                                                  font="arial", width=30, height=2, command=self.add_inventory)
         self.button_add_to_inventory.pack()
-
         self.button_remove_from_inventory = tk.Button(self.main_frame, text="Quitar del inventario",
                                                       font="arial", width=30, height=2, command=self.remove_inventory)
         self.button_remove_from_inventory.pack()
-
         self.button_exit = tk.Button(self.main_frame, text="Salir", font="arial",
                                      command= lambda: exit_procedures(self.master),
                                      width=30, height=2)
         self.button_exit.pack()
-
         self.main_frame.pack(fill=tk.X)
+
+        # Update remote repo using git
+        if update.check_update() == True:
+            self.update_window = tk.Toplevel(self.master, bg="grey")
+            self.temporal_window = update_manager(self.update_window)
 
     def show_inventory(self):
         self.show_inventory_window = tk.Toplevel(self.master, bg="grey")
@@ -147,16 +141,34 @@ class show_inventory_manager:
         self.title_frame.pack(side="top", fill=tk.X)
 
         # TITLE-NAME _ width pair
-        self.aux = (("NOMBRE",20), ("DESCRIPCION",40), ("CANTIDAD",13), ("PRECIO LLEGADA",18),
+        self.aux = (("NOMBRE",20), ("DESCRIPCION",40), ("CANTIDAD",18), ("PRECIO LLEGADA",18),
         ("PRECIO TALLERES",18), ("PRECIO PUBLICO",18))
 
         self.label_title = [0, 1, 2, 3, 4, 5]
         self.counter     = 0
+        
+        # Creating column titles
         for i,j in self.aux:
             self.label_title[self.counter] = tk.Label(self.title_frame, text=i, font="ARIAL", width=j,
             height=3, relief="groove")
             self.label_title[self.counter].pack(side="left")
             self.counter += 1
+
+
+        # Extracting totals from pr1, pr2, pr3
+        
+        
+        # Footer of the page
+        self.inventory_footer_frame = tk.Frame(self.master)
+        self.inventory_footer_frame.pack(side="bottom", fill=tk.X)
+        width_list = [21, 22, 22]
+        self.inventory_footer_label = [0, 0, 0]
+        for i in range(3):
+            self.inventory_footer_label[i] = tk.Label(self.inventory_footer_frame, text="Hola mundo", relief="groove",
+                                                      borderwidth=4, width=width_list[i])
+            self.inventory_footer_label[i].pack(side="right")
+
+        
 
         # list section
         self.list_frame = tk.Frame(self.master)
@@ -168,12 +180,14 @@ class show_inventory_manager:
         self.inventory_list = [0, 1, 2, 3, 4, 5]
         self.counter = 0
         self.scroll_function_list = [self.yscroll1, self.yscroll2, self.yscroll3, self.yscroll4, self.yscroll5, self.yscroll6]
-        for i in [20, 40, 14, 18, 18, 18]:
+        for i in [20, 40, 18, 18, 18, 18]:
             self.inventory_list[self.counter] = tk.Listbox(self.list_frame,
             yscrollcommand = self.scroll_function_list[self.counter], font="arial", heigh=40, width=i, relief="groove")
             self.inventory_list[self.counter].pack(side="left")
             self.counter += 1
 
+
+        
         # inserting values from database to list
         self.aux        = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
         self.info       = json.load(open("./DATABASE/inventory.json", "r"))
@@ -184,15 +198,9 @@ class show_inventory_manager:
                 for x in range(6):
                     self.inventory_list[x].insert(tk.END, str(self.info[i][self.aux[i]][j][x]))
 
-        # Final part
-        self.footer_total_frame = tk.Frame(self.master)
-        self.footer_total_frame.pack(side="right")
 
-        self.footer_total = [0, 0, 0]
-        self.footer_total[0] = tk.Label(self.footer_total_frame, width=20)
-        self.footer_total[0].pack(fill=tk.X)
-
-
+                    
+ 
     def yscroll1(self, *args):
         if self.inventory_list[1].yview() != self.inventory_list[0].yview():
             self.inventory_list[1].yview_moveto(args[0])
@@ -516,8 +524,6 @@ class remove_inventory_manager:
             # Iterating elements by letter in the database
             for i in range(len(info[aux.index(first_letter)][first_letter])):
 
-                
-
                 # first element (name) of the lists == data, then delete it
                 if info[aux.index(first_letter)][first_letter][i][0] == data.upper():
                     info[aux.index(first_letter)][first_letter].pop(i)
@@ -538,6 +544,32 @@ class remove_inventory_manager:
         self.ok_button = tk.Button(self.new_window, text="ok", font=("arial",12), relief="groove",
                                    borderwidth=4, command=self.new_window.destroy)
         self.ok_button.pack()
+
+class update_manager:
+    def __init__(self, master):
+        """ Update Program using git pull """
+        self.master = master
+        self.master.title("UPDATE")
+        self.master.geometry("800x175")
+        self.master.resizable(0,0)
+
+        self.label = tk.Label(self.master, font=("arial", 12), 
+                              text=" Hay una actualizacion disponible, Desea actualizar el programa? ")
+        self.label.pack()
+
+        self.choice_frame = tk.Frame(self.master)
+        self.choice_frame.pack()
+        
+        self.negative_button = tk.Button(self.choice_frame, text="No, gracias", font=("arial",12),
+                                         command=self.master.destroy)
+        self.negative_button.pack()
+
+        self.affirmative_button = tk.Button(self.choice_frame, text="Si, por favor", font=("arial",12),
+                                            command=self.affirmative_update)
+        self.affirmative_button.pack()
+        
+    def affirmative_update(self):
+        update.update_repo()
         
 
 def main():
@@ -548,3 +580,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+## FIX AUTO UPDATE SYSTEM
+## BETTER DB HANDLER for errors

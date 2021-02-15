@@ -1,2 +1,8 @@
 # Ignore database files
 DATABASE/*.json*
+
+# Ignoring python files
+__pycache__
+
+# Ignoring emacs backups files
+*~
