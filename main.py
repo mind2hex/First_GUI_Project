@@ -91,7 +91,7 @@ class MOTOGP_DATABASE:
         # Search section
         self.search_frame = tk.Frame(bg="black")
         self.button_search = tk.Button(self.search_frame, text=" Buscar ", font="arial", relief="flat",
-                                       command= lambda: search_string(self.entry_search.get()))
+                                       command=self.search_inventory) # lambda: search_string(self.entry_search.get()))
         self.button_search.pack(side="right")
         self.entry_search  = tk.Entry(self.search_frame, font="arial", justify="left",
                                       width=30, bd=5)
@@ -120,6 +120,10 @@ class MOTOGP_DATABASE:
         if update.check_update() == True:
             self.update_window = tk.Toplevel(self.master, bg="grey")
             self.temporal_window = update_manager(self.update_window)
+
+    def search_inventory(self):
+        aux_info = self.entry_search.get()
+        print(aux_info)
 
     def show_inventory(self):
         self.show_inventory_window = tk.Toplevel(self.master, bg="grey")
