@@ -5,6 +5,7 @@ import json
 import pathlib
 import update
 from platform import system as operative_system
+from datetime import date
 
 AUTHOR = "JOHAN | mind2hex"
 VERSION = "[v1.0]"
@@ -28,7 +29,7 @@ def DB_CHECK():
     # Checking DATABASE json format
     try:
         json.load(open("./DATABASE/inventory.json","r"))
-    except json.decoder.JSONDecodeError:
+    except:
         # Basic format of the inventory.json file
         lista = json_inventory_format()
 
@@ -43,17 +44,29 @@ def DB_CHECK():
         for i in range(len(aux)):
             lista[i][aux[i]]
 
-    except KeyError or IndexError:
+    except:
         lista = json_inventory_format()
         handler = open("./DATABASE/inventory.json","w")
         handler.write(json.dumps(lista, sort_keys=True, indent=4))
 
     # Generating backup
-    with open("./DATABASE/inventory.json", "r") as src_file:
-        info = src_file.read()
+    # 100 is the database backups limit
+    status = False
+    for i in range(1000):
+        if pathlib.Path(f"./DATABASE/inventory.json.backup({i})").exists() == True:
+            continue
+        else:
+            with open("./DATABASE/inventory.json", "r") as src_file:
+                info = src_file.read()
+                dst_file = open(f"./DATABASE/inventory.json.backup({i})", "w")
+                dst_file.write(info)
+            status = True
+            break
 
-        dst_file = open("./DATABASE/inventory.json.backup", "w")
-        dst_file.write(info)
+    if status == False:
+        print(" Database backups reached to the limit ")
+        # Finish this
+
 
 def json_inventory_format():
     aux = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -96,7 +109,13 @@ class MOTOGP_DATABASE:
         self.entry_search  = tk.Entry(self.search_frame, font="arial", justify="left",
                                       width=30, bd=5)
         self.entry_search.pack(side="right")
+        actual_date = date.today().strftime("%d/%m/%Y")
+        self.date_label = tk.Label(self.search_frame, bg="black", font=("arial", 12), fg="white", text=f"FECHA: {actual_date}")
+        self.date_label.pack(side="left")
         self.search_frame.pack(side="top", fill=tk.X)
+
+        self.empty_label = tk.Label(self.master, bg="black", height=5)
+        self.empty_label.pack()
 
         # Inventory section
         self.main_frame = tk.Frame(self.master, relief="groove", bg="black")
@@ -104,6 +123,10 @@ class MOTOGP_DATABASE:
                                                font="arial", command=self.show_inventory,
                                                width=30, height=2)
         self.button_show_inventory.pack()
+
+        self.button_sales_register = tk.Button(self.main_frame, text="Venta",
+        font="arial", command=self.sales_register, width=30, height=2)
+        self.button_sales_register.pack()
         self.button_add_to_inventory = tk.Button(self.main_frame, text="Agregar al inventario",
                                                  font="arial", width=30, height=2, command=self.add_inventory)
         self.button_add_to_inventory.pack()
@@ -128,6 +151,10 @@ class MOTOGP_DATABASE:
     def show_inventory(self):
         self.show_inventory_window = tk.Toplevel(self.master, bg="grey")
         self.app = show_inventory_manager(self.show_inventory_window)
+
+    def sales_register(self):
+        self.sales_register_window = tk.Toplevel(self.master, bg="grey")
+        self.app = sales_register_manager(self.sales_register_window)
 
     def add_inventory(self):
         self.add_inventory_window = tk.Toplevel(self.master, bg="grey")
@@ -204,8 +231,6 @@ class show_inventory_manager:
             self.inventory_list[self.counter].pack(side="left")
             self.counter += 1
 
-
-
         # inserting values from database to list
         self.text_lines = ["", "", "", "", "", ""]
         self.counter    = 0
@@ -213,9 +238,6 @@ class show_inventory_manager:
             for j in range(len(self.info[i][self.aux[i]])):
                 for x in range(6):
                     self.inventory_list[x].insert(tk.END, str(self.info[i][self.aux[i]][j][x]))
-
-
-
 
     def yscroll1(self, *args):
         if self.inventory_list[1].yview() != self.inventory_list[0].yview():
@@ -331,6 +353,45 @@ class show_inventory_manager:
         for i in range(len(self.aux)):
             for j in range(len(self.info[i][self.aux[i]])):
                 pass
+
+class sales_register_manager:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Inventory list")
+        self.master.geometry("800x175")
+        self.master.resizable(0,0)
+
+        # FRAME 1
+        self.test_frame_1 = tk.Frame(self.master)
+        self.test_frame_1.pack(fill=tk.X)
+        self.name_label = tk.Label(self.test_frame_1, relief="groove", borderwidth=2,
+                                   width=12, height=1, text="NOMBRE", font=("ARIAL", 12))
+        self.name_label.pack(side="left")
+        self.name_entry = tk.Entry(self.test_frame_1, font=("ARIAL", 12))
+        self.name_entry.pack(fill=tk.X, padx=4)
+
+        # FRAME 1
+        self.test_frame_2 = tk.Frame(self.master)
+        self.test_frame_2.pack(fill=tk.X)
+        self.cant_label = tk.Label(self.test_frame_2, relief="groove", borderwidth=2,
+                                   width=12, height=1, text="CANTIDAD", font=("ARIAL", 12))
+        self.cant_label.pack(side="left")
+        self.cant_entry = tk.Entry(self.test_frame_2, font=("ARIAL", 12))
+        self.cant_entry.pack(fill=tk.X, padx=4)
+
+        self.test_frame_3 = tk.Frame(self.master)
+        self.test_frame_3.pack(fill=tk.X)
+        aux_var = tk.IntVar()
+        self.taller_Rbutton = tk.Radiobutton(self.test_frame_3, text="Talleres", variable=aux_var, value=1,
+        font=("arial",12))
+        self.taller_Rbutton.pack()
+
+        self.public_Rbutton = tk.Radiobutton(self.test_frame_3, text="Publico", variable=aux_var, value=2,
+        font=("arial",12))
+        self.public_Rbutton.pack()
+
+        self.make_sale = tk.Button(self.master, text=" VENDER ", font=("arial",12))
+        self.make_sale.pack()
 
 class add_inventory_manager:
     def __init__(self, master):

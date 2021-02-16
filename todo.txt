@@ -1,17 +1,20 @@
-1.- Mostrar inventario
-  -- Formato del inventario:
-  --- Producto, Descripcion, precio, cantidad y Codigo_de_producto
+1.- Utilidad de venta:
+  -- Datos que va a solicitar:
+  --- Nombre del Producto
+  --- Cantidad de unidades de dicho producto
+  --- Objetivo de venta ( talleres, publico )
+  El sistema de ventas debe funcionar con la fecha actual, y debe registrar
+  la venta en su respectivo archivo, ademas se debe mostrar el valor total de las
+  ventas que van por dia
 
-2.- Modificar inventario
-  -- Cambiar Nombre del producto
-  -- Cambiar Descripcion de un producto
-  -- Cambiar precio de un Producto
-  -- Restar o aumentar cantidad de un producto
+2.- Utilidad de busqueda:
+  -- Va a mostrar una lista parecida a la de mostrar inventario, pero unicamente
+  se van a mostrar los elementos que coincidan con la busqueda
 
-3.- Agregar elemento al inventario
-  --
+3.- Limpiar backups:
+  -- Con el sistema que se esta empleando, cada vez que se inicia el programa
+  se crea una nueva base de datos, por lo que si se abre muchas veces el programa
+  se van a crear varios backups por lo que tener un limpiador seria buena idea.
 
-4.- Eliminar elemento del inventario
-  --
-
-5.- Agregar sistema de actualizacion automatico
+4.- Verificar, si la base de datos backup es igual a la actual entonces no crear un nuevo backup al iniciar,
+  Esto con el fin de evitar que se creen muchos backups

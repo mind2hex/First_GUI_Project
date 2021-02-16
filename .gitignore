@@ -6,3 +6,6 @@ __pycache__
 
 # Ignoring emacs backups files
 *~
+
+# Ignoring .bat files
+*.bat
