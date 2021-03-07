@@ -18,3 +18,7 @@
 
 4.- Verificar, si la base de datos backup es igual a la actual entonces no crear un nuevo backup al iniciar,
   Esto con el fin de evitar que se creen muchos backups
+
+
+5.- Al ejecutarse en diferentes sistemas operativos, puede que el interprete de python se ejecute con un diferente alias
+  Lo que puede hacer que el programa no funcione.
