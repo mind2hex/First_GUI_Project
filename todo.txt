@@ -19,6 +19,11 @@
 4.- Verificar, si la base de datos backup es igual a la actual entonces no crear un nuevo backup al iniciar,
   Esto con el fin de evitar que se creen muchos backups
 
-
 5.- Al ejecutarse en diferentes sistemas operativos, puede que el interprete de python se ejecute con un diferente alias
   Lo que puede hacer que el programa no funcione.
+
+9.- Al momento de dar click en "si por favor", mostrarle algo al usuario de que se esta realizando la actualizacion.
+
+10.- Utilidad para restaurar base de datos
+
+11.- Refactorizar

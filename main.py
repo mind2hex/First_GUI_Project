@@ -1,80 +1,14 @@
 #!/usr/bin/python3
 
 import tkinter as tk
-import json
-import pathlib
 import update
+import database
 from platform import system as operative_system
+from urllib.request import urlopen
 from datetime import date
 
 AUTHOR = "JOHAN | mind2hex"
 VERSION = "[v1.0]"
-
-def DB_CHECK():
-    """ this function check DATABASE integrity """
-    # Checking DATABASE directory
-    if pathlib.Path("./DATABASE").exists() == False:
-        # Creating DATABASE if directory doesn't exist
-
-        if operative_system() == "Linux":
-            pathlib.mkdir("./DATABASE")
-
-        elif operative_system() == "Windows":
-            pathlib.Path("./DATABASE").mkdir()
-
-    # Checking DATABASE file
-    if pathlib.Path("./DATABASE/inventory.json").exists() == False:
-        pathlib.Path("./DATABASE/inventory.json").touch()
-
-    # Checking DATABASE json format
-    try:
-        json.load(open("./DATABASE/inventory.json","r"))
-    except:
-        # Basic format of the inventory.json file
-        lista = json_inventory_format()
-
-        # Saving basic format into a new inventory.json file
-        handler = open("./DATABASE/inventory.json","w")
-        handler.write(json.dumps(lista, sort_keys=True, indent=4))
-
-    # Checking DATABASE json correct template
-    aux = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    try:
-        lista = json.load(open("./DATABASE/inventory.json","r"))
-        for i in range(len(aux)):
-            lista[i][aux[i]]
-
-    except:
-        lista = json_inventory_format()
-        handler = open("./DATABASE/inventory.json","w")
-        handler.write(json.dumps(lista, sort_keys=True, indent=4))
-
-    # Generating backup
-    # 100 is the database backups limit
-    status = False
-    for i in range(1000):
-        if pathlib.Path(f"./DATABASE/inventory.json.backup({i})").exists() == True:
-            continue
-        else:
-            with open("./DATABASE/inventory.json", "r") as src_file:
-                info = src_file.read()
-                dst_file = open(f"./DATABASE/inventory.json.backup({i})", "w")
-                dst_file.write(info)
-            status = True
-            break
-
-    if status == False:
-        print(" Database backups reached to the limit ")
-        # Finish this
-
-
-def json_inventory_format():
-    aux = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    lista = []
-    for i in range(len(aux)):
-        lista.append({aux[i]:[]})
-
-    return lista
 
 def search_string(string):
     # Routines to search string in DATABASE
@@ -124,7 +58,7 @@ class MOTOGP_DATABASE:
                                                width=30, height=2)
         self.button_show_inventory.pack()
 
-        self.button_sales_register = tk.Button(self.main_frame, text="Venta",
+        self.button_sales_register = tk.Button(self.main_frame, text="Facturar",
         font="arial", command=self.sales_register, width=30, height=2)
         self.button_sales_register.pack()
         self.button_add_to_inventory = tk.Button(self.main_frame, text="Agregar al inventario",
@@ -140,9 +74,12 @@ class MOTOGP_DATABASE:
         self.main_frame.pack(fill=tk.X)
 
         # Update remote repo using git
-        if update.check_update() == True:
-            self.update_window = tk.Toplevel(self.master, bg="grey")
-            self.temporal_window = update_manager(self.update_window)
+        if check_internet_connection() == True:
+            if update.check_update() == True:
+                self.update_window = tk.Toplevel(self.master, bg="grey")
+                self.temporal_window = update_manager(self.update_window)
+        else:
+            print("[#] No internet Connection... skipping Update")
 
     def search_inventory(self):
         aux_info = self.entry_search.get()
@@ -164,6 +101,12 @@ class MOTOGP_DATABASE:
         self.remove_inventory_window = tk.Toplevel(self.master, bg="grey")
         self.app = remove_inventory_manager(self.remove_inventory_window)
 
+def check_internet_connection():
+    try:
+        response = urlopen("https://github.com/", timeout=5)
+        return True
+    except:
+        return False
 
 class show_inventory_manager:
     def __init__(self, master):
@@ -648,16 +591,11 @@ class update_manager:
     def affirmative_update(self):
         update.update_repo()
 
-
 def main():
-    DB_CHECK()
+    database.database_routine()
     root = tk.Tk()
     app  = MOTOGP_DATABASE(root)
     root.mainloop()
 
 if __name__ == "__main__":
     main()
-
-
-## FIX AUTO UPDATE SYSTEM
-## BETTER DB HANDLER for errors
