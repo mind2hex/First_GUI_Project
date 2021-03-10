@@ -3,7 +3,6 @@
 import tkinter as tk
 import update
 import database
-from platform import system as operative_system
 from urllib.request import urlopen
 from datetime import date
 import json
@@ -303,10 +302,10 @@ class sales_register_manager:
     def __init__(self, master):
         self.master = master
         self.master.title("Inventory list")
-        self.master.geometry("800x175")
+        self.master.geometry("800x200")
         self.master.resizable(0,0)
 
-        # PLACA O NOMBRE 
+        # PLACA O NOMBRE
         self.id_frame = tk.Frame(self.master)
         self.id_frame.pack(fill=tk.X)
         self.id_label = tk.Label(self.id_frame, relief="groove", borderwidth=2,
@@ -346,21 +345,82 @@ class sales_register_manager:
         self.opt_frame = tk.Frame(self.master)
         self.opt_frame.pack(fill=tk.X)
         option_list = ["TALLERES", "PUBLICO"]
-        var = tk.StringVar(self.master)
-        var.set(option_list[0])
+        self.var = tk.StringVar(self.master)
+        self.var.set(option_list[0])
 
-        self.opt_menu = tk.OptionMenu(self.opt_frame, var, *option_list)
+        self.opt_menu = tk.OptionMenu(self.opt_frame, self.var, *option_list)
         self.opt_menu.config(width=20, font=("ARIAL", 12))
         self.opt_menu.pack(side="left")
 
-        def callback(*args):
-            print(var.get())
-
-        var.trace("w", callback)
-
-        self.make_sale = tk.Button(self.master, text=" VENDER ", font=("arial",12))
+        self.make_sale = tk.Button(self.master, text=" VENDER ", font=("arial",12), command=self.sales_register_handler)
         self.make_sale.pack()
-        
+
+        self.message_label = tk.Label(self.master, font=("ARIAL", 12))
+        self.message_label.pack()
+
+    def sales_register_handler(self):
+        entry_string = date.today().strftime("%d/%m/%Y") + " "
+
+        # Check MATRICULA or NAME in VENTAS
+        identification = self.id_entry.get().upper()
+        if len(identification) == 0:
+            self.message_label.configure(text=" No se introdujo PLACA o nombre del cliente ")
+            return 0
+        elif database.sales_record_exist(identification) == False:
+            database.sales_record_create(identification)
+        entry_string += f"[Placa nombre del cliente: {identification}], "
+
+        # chekc if given name is in database
+        product_name = self.product_entry.get()
+        if len(product_name) == 0:
+            print(" ERROR no product name introduced ")
+            self.message_label.configure(text=" No se introdujo nombre del producto ")
+            return 0
+        elif database.database_name_exist(product_name.upper()) == False:
+            print(" ERROR, the product doesn't exist inside the database ")
+            self.message_label.configure(text=" El producto no existe en el inventario")
+            return 0
+        else:
+            result = database.database_name_find(product_name)[0]
+        entry_string += f"[Piezas: {product_name}], "
+
+        # Check if cantidad is less or equal to what is in inventory
+        cantidad = self.cant_entry.get()
+        if len(cantidad) == 0:
+            self.message_label.configure(text=" No se introdujo la cantidad ")
+        elif int(cantidad) > int(result[2]):
+            print(" ERROR, se excede la cantidad del producto ")
+            self.message_label.configure(text=" La cantidad excede el limite disponible en el inventario")
+            return 0
+        else:
+            entry_string += f"[Cantidad Piezas: {cantidad}], "
+
+        # Calcular PRECIO
+        objetivo_venta = self.var.get()
+        if objetivo_venta == "TALLERES":
+            precio = result[4]
+        else:
+            precio = result[5]
+        entry_string += f"[Precio por pieza: {precio}], "
+
+        # Mano de obra
+        workforce = self.workforce_entry.get()
+        if len(workforce) == 0:
+            workforce = 0
+        elif workforce.isdigit() == False:
+            print(" ERROR mano de obra no es un valor entero ")
+            self.message_label.configure(text=" Valor incorrecto introducido en MANO DE OBRA ")
+        entry_string += f"[Mano de obra: {workforce}], "
+
+        entry_string += f"[Precio total de venta: {(int(cantidad) * int(precio)) + int(workforce)}]"
+
+        with open(f"./VENTAS/{identification}.log", "a") as handler:
+            handler.write(entry_string + "\n")
+
+        database.database_modify_entry(product_name, "CANTIDAD", int(result[2]) - int(cantidad))
+        self.message_label.configure(text=" Venta realizada exitosamente ")
+
+        #print(entry_string)
 
 class add_inventory_manager:
     def __init__(self, master):
@@ -563,7 +623,7 @@ class remove_inventory_manager:
 
         if status == True:
             """ Buscando el elemento en la base de datos """
-            aux = "ABCDEFGHIJKLMNOPQRSTUVWXYZ01256789"
+            aux = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
             status = False
             info = json.load(open("./DATABASE/inventory.json", "r"))
             first_letter = data[0].upper()

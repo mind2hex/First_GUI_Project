@@ -27,3 +27,7 @@
 10.- Utilidad para restaurar base de datos
 
 11.- Refactorizar
+
+12.- Revisar si hay entradas repetidas en la base de datos
+
+13.- Limpieza de entrada en la utilidad FACTURAR

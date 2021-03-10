@@ -2,6 +2,18 @@
 import pathlib
 import json
 from hashlib import md5
+from platform import system as operative_system
+import re
+
+def sales_log():
+    """ This function create ./VENTAS directory if it doesn't exist
+    This directory stores sales log from every person or vehicule
+    """
+    if pathlib.Path("./VENTAS").exists() == False:
+        if operative_system() == "Linux":
+            pathlib.mkdir("./VENTAS")
+        elif operative_system() == "Windows":
+            pathlib.Path("./VENTAS").mkdir()
 
 def database_directory_check():
     """ This function create ./DATABASE directory if it doesn't exist """
@@ -76,11 +88,87 @@ def json_inventory_format():
     return lista
 
 def database_routine():
+    sales_log()
     database_directory_check()
     database_files_check()
     database_JSON_format_check()
     database_template_check()
     database_generate_backup()
+
+def database_name_find(pattern):
+    """ Find all names that match with pattern
+    return Values:
+      A list with the matched entries and his data
+      oterwise return Null
+    """
+    lista = []
+    aux = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    info = json.load(open("./DATABASE/inventory.json", "r"))
+    for i in range(len(aux)):
+        for j in range(len(info[i][aux[i]])):
+            if re.match(pattern, " ".join(info[i][aux[i]][j])) != None:
+                lista.append(info[i][aux[i]][j])
+
+    return lista
+
+
+def database_modify_entry(name, type, modify):
+    """find name in inventory, select type and replaces his value with modify """
+    lista = ["NOMBRE", "DESCRIPCION", "CANTIDAD", "PR1", "PR2", "PR3"]
+    for i in range(len(lista)):
+        if type == lista[i]:
+            index = i
+
+    lista = []
+    aux = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    info = json.load(open("./DATABASE/inventory.json", "r"))
+    for i in range(len(aux)):
+        for j in range(len(info[i][aux[i]])):
+            if info[i][aux[i]][j][0] == name:
+                info[i][aux[i]][j][index] = str(modify)
+
+    
+    handler = open("./DATABASE/inventory.json","w")
+    handler.write(json.dumps(info, sort_keys=True, indent=4))
+
+
+
+def database_name_exist(name):
+    """ Find name in the Database
+    return Values:
+      True  -> if name exist in database
+      False -> if it doesn't exist
+    """
+
+    aux = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    info = json.load(open("./DATABASE/inventory.json", "r"))
+    status = False
+    for i in range(len(aux)):
+        for j in range(len(info[i][aux[i]])):
+             if name in info[i][aux[i]][j]:
+                 status = True
+                 break
+        if status == True:
+            break
+
+    return status
+
+def sales_record_exist(name):
+    """ Find if file name exist inside the directory ./SALES
+    return Values:
+      True  -> if name exist inside ./SALES directory
+      False -> if it doesn't
+    """
+    for i in pathlib.Path("./VENTAS").glob("**/*"):
+        if name.upper() in repr(i):
+            return True
+
+    return False
+
+def sales_record_create(name):
+    """ Creates entry inside the directory ./SALES """
+    pathlib.Path(f"./VENTAS/{name.upper()}.log").touch()
+
 
 if __name__ == "__main__":
     pass

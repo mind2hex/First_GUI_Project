@@ -9,3 +9,6 @@ __pycache__
 
 # Ignoring .bat files
 *.bat
+
+# Ignoring .log files
+*.log
