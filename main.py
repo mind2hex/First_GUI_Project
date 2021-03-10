@@ -6,6 +6,8 @@ import database
 from platform import system as operative_system
 from urllib.request import urlopen
 from datetime import date
+import json
+import hashlib
 
 AUTHOR = "JOHAN | mind2hex"
 VERSION = "[v1.0]"
@@ -304,37 +306,61 @@ class sales_register_manager:
         self.master.geometry("800x175")
         self.master.resizable(0,0)
 
-        # FRAME 1
-        self.test_frame_1 = tk.Frame(self.master)
-        self.test_frame_1.pack(fill=tk.X)
-        self.name_label = tk.Label(self.test_frame_1, relief="groove", borderwidth=2,
-                                   width=12, height=1, text="NOMBRE", font=("ARIAL", 12))
-        self.name_label.pack(side="left")
-        self.name_entry = tk.Entry(self.test_frame_1, font=("ARIAL", 12))
-        self.name_entry.pack(fill=tk.X, padx=4)
+        # PLACA O NOMBRE 
+        self.id_frame = tk.Frame(self.master)
+        self.id_frame.pack(fill=tk.X)
+        self.id_label = tk.Label(self.id_frame, relief="groove", borderwidth=2,
+                                 width=20, height=1, text=" PLACA O NOMBRE ", font=("ARIAL", 12))
+        self.id_label.pack(side="left")
+        self.id_entry = tk.Entry(self.id_frame, font=("ARIAL", 12))
+        self.id_entry.pack(fill=tk.X, padx=4)
 
-        # FRAME 1
-        self.test_frame_2 = tk.Frame(self.master)
-        self.test_frame_2.pack(fill=tk.X)
-        self.cant_label = tk.Label(self.test_frame_2, relief="groove", borderwidth=2,
-                                   width=12, height=1, text="CANTIDAD", font=("ARIAL", 12))
+        # NOMBRE PRODUCTO
+        self.product_frame = tk.Frame(self.master)
+        self.product_frame.pack(fill=tk.X)
+        self.product_label = tk.Label(self.product_frame, relief="groove", borderwidth=2,
+                                   width=20, height=1, text="NOMBRE PRODUCTO", font=("ARIAL", 12))
+        self.product_label.pack(side="left")
+        self.product_entry = tk.Entry(self.product_frame, font=("ARIAL", 12))
+        self.product_entry.pack(fill=tk.X, padx=4)
+
+        # CANTIDAD
+        self.cant_frame = tk.Frame(self.master)
+        self.cant_frame.pack(fill=tk.X)
+        self.cant_label = tk.Label(self.cant_frame, relief="groove", borderwidth=2,
+                                   width=20, height=1, text="CANTIDAD", font=("ARIAL", 12))
         self.cant_label.pack(side="left")
-        self.cant_entry = tk.Entry(self.test_frame_2, font=("ARIAL", 12))
+        self.cant_entry = tk.Entry(self.cant_frame, font=("ARIAL", 12))
         self.cant_entry.pack(fill=tk.X, padx=4)
 
-        self.test_frame_3 = tk.Frame(self.master)
-        self.test_frame_3.pack(fill=tk.X)
-        aux_var = tk.IntVar()
-        self.taller_Rbutton = tk.Radiobutton(self.test_frame_3, text="Talleres", variable=aux_var, value=1,
-        font=("arial",12))
-        self.taller_Rbutton.pack()
+        # MANO OBRA
+        self.workforce_frame = tk.Frame(self.master)
+        self.workforce_frame.pack(fill=tk.X)
+        self.workforce_label = tk.Label(self.workforce_frame, relief="groove", borderwidth=2,
+                                        width=20, height=1, text="MANO DE OBRA", font=("ARIAL", 12))
+        self.workforce_label.pack(side="left")
+        self.workforce_entry = tk.Entry(self.workforce_frame, font=("ARIAL", 12))
+        self.workforce_entry.pack(fill=tk.X, padx=4)
 
-        self.public_Rbutton = tk.Radiobutton(self.test_frame_3, text="Publico", variable=aux_var, value=2,
-        font=("arial",12))
-        self.public_Rbutton.pack()
+        # OPTION MENU
+        self.opt_frame = tk.Frame(self.master)
+        self.opt_frame.pack(fill=tk.X)
+        option_list = ["TALLERES", "PUBLICO"]
+        var = tk.StringVar(self.master)
+        var.set(option_list[0])
+
+        self.opt_menu = tk.OptionMenu(self.opt_frame, var, *option_list)
+        self.opt_menu.config(width=20, font=("ARIAL", 12))
+        self.opt_menu.pack(side="left")
+
+        def callback(*args):
+            print(var.get())
+
+        var.trace("w", callback)
 
         self.make_sale = tk.Button(self.master, text=" VENDER ", font=("arial",12))
         self.make_sale.pack()
+        
 
 class add_inventory_manager:
     def __init__(self, master):
