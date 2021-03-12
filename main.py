@@ -11,21 +11,16 @@ import hashlib
 AUTHOR = "JOHAN | mind2hex"
 VERSION = "[v1.0]"
 
-def search_string(string):
-    # Routines to search string in DATABASE
-    # string probably will be an ID for every product of the storage
-    print(string)
-
 def exit_procedures(root):
     # Routines to save db...
     root.destroy()
     exit(0)
 
-class MOTOGP_DATABASE:
+class MOTOS_HG_DATABASE:
     def __init__(self, master):
         """ Starting Main Window """
         self.master = master
-        self.master.title("MotoGP DATABASE")
+        self.master.title("MotosHG DATABASE")
         self.master.geometry("1250x680")
         self.master.resizable(0,0)
         self.master.configure(background="black")
@@ -74,11 +69,18 @@ class MOTOGP_DATABASE:
         self.button_exit.pack()
         self.main_frame.pack(fill=tk.X)
 
+        self.update_frame = tk.Frame(self.master)
+        self.update_frame.pack()
+
         # Update remote repo using git
         if check_internet_connection() == True:
             if update.check_update() == True:
-                self.update_window = tk.Toplevel(self.master, bg="grey")
-                self.temporal_window = update_manager(self.update_window)
+                self.update_label = tk.Button(self.update_frame, font=("ARIAL", 12), \
+                                              text=" Actualizacion Disponible, presione para actualizar ", \
+                                              command=update.update_repo)
+                self.update_label.pack()
+                #self.update_window = tk.Toplevel(self.master, bg="grey")
+                #self.temporal_window = update_manager(self.update_window)
         else:
             print("[#] No internet Connection... skipping Update")
 
@@ -680,7 +682,7 @@ class update_manager:
 def main():
     database.database_routine()
     root = tk.Tk()
-    app  = MOTOGP_DATABASE(root)
+    app  = MOTOS_HG_DATABASE(root)
     root.mainloop()
 
 if __name__ == "__main__":

@@ -10,19 +10,13 @@ def sales_log():
     This directory stores sales log from every person or vehicule
     """
     if pathlib.Path("./VENTAS").exists() == False:
-        if operative_system() == "Linux":
-            pathlib.mkdir("./VENTAS")
-        elif operative_system() == "Windows":
-            pathlib.Path("./VENTAS").mkdir()
+        pathlib.Path("./VENTAS").mkdir()
 
 def database_directory_check():
     """ This function create ./DATABASE directory if it doesn't exist """
     if pathlib.Path("./DATABASE").exists() == False:
-        if operative_system() == "Linux":
-            pathlib.mkdir("./DATABASE")
-        elif operative_system() == "Windows":
-            pathlib.Path("./DATABASE").mkdir()
-
+        pathlib.Path("./DATABASE").mkdir()
+        
 def database_files_check():
     """ This function create ./DATABASE/<files> if it doesn't exist """
     if pathlib.Path("./DATABASE/inventory.json").exists() == False:
@@ -88,11 +82,22 @@ def json_inventory_format():
     return lista
 
 def database_routine():
+    # Creating ./VENTAS directory
     sales_log()
+
+    # Creating ./DATABASE directory
     database_directory_check()
+
+    # Checking ./DATABASE/inventory.json integrity
     database_files_check()
+
+    # Checking ./DATABASE/inventory.json correct json format
     database_JSON_format_check()
+
+    # Checking Basic ./DATABASE/inventory.json template
     database_template_check()
+
+    # Generating ./DATABASE/inventory.json backup if it has changed
     database_generate_backup()
 
 def database_name_find(pattern):

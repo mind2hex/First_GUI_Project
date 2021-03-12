@@ -24,6 +24,6 @@ def check_update():
         return True
 
 
-def update_repo():
+def update_repo(*args):
     """ Just pull the repository """
     command("git pull origin main")
