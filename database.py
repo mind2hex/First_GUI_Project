@@ -136,8 +136,24 @@ def database_modify_entry(name, type, modify):
     handler = open("./DATABASE/inventory.json","w")
     handler.write(json.dumps(info, sort_keys=True, indent=4))
 
-
-
+def database_add_entry(name, description, cant, val1, val2, val3):
+        """ as its name tell us 
+        return values:
+        - True  -> If There is no problem during writing on database
+        - False -> If there is a problem
+        """
+        info = json.load(open("./DATABASE/inventory.json", "r"))
+        aux = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        
+        value = [ name.upper(), description.upper(), \
+                  cant, val1, val2, val3 ]
+        
+        info[aux.index(name.upper()[0])][name[0].upper()].append(value)
+        to_write = json.dumps(info, sort_keys=True, indent=4)
+        with open("./DATABASE/inventory.json", "w") as handler:
+            handler.write(to_write)
+            return True
+        
 def database_name_exist(name):
     """ Find name in the Database
     return Values:

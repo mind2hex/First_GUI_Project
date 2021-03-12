@@ -141,6 +141,9 @@ class show_inventory_manager:
         self.info       = json.load(open("./DATABASE/inventory.json", "r"))
         quantity = 0
         lista = [0, 0, 0]
+
+        # Deleting this part for client request
+        """
         # Extracting totals from pr1, pr2, pr3
         for i in range(len(self.aux)):
             for j in range(len(self.info[i][self.aux[i]])):
@@ -160,6 +163,7 @@ class show_inventory_manager:
                                                       borderwidth=4, width=width_list[i])
             self.inventory_footer_label[i].pack(side="right")
             counter -= 1
+        """
 
         # list section
         self.list_frame = tk.Frame(self.master)
@@ -429,7 +433,7 @@ class add_inventory_manager:
         """ Inventory list window initialization """
         self.master = master
         self.master.title("Inventory list")
-        self.master.geometry("800x175")
+        self.master.geometry("800x200")
         self.master.resizable(0,0)
 
         # FRAME 1
@@ -494,6 +498,11 @@ class add_inventory_manager:
                                     height=1)
         self.add_button.pack()
 
+        self.status_label = tk.Label(self.master, font=("ARIAL", 12), \
+                                     text=" Presione AGREGAR para continuar ", \
+                                     height=4, width=45)
+        self.status_label.pack()        
+
     def press_button(self):
         """ function handler for add button """
 
@@ -513,82 +522,47 @@ class add_inventory_manager:
         aux = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 "
 
         if len(desc_val) == 0 or desc_val.isspace() == True:
-            self.error_label(f" No se ha introducido: DESCRIPCION ")
+            self.status_label.configure(text=" No se ha introducido: DESCRIPCION ")
             status = False
             return 0
 
         for i in desc_val.upper():
             if i not in aux:
-                self.error_label(f" Caracter invalido en: DESCRIPCION ")
+                self.status_label.configure(text=" No se ha introducido: DESCRIPCION ")
                 status = False
                 return 0
 
         for i,j in lista:
             if j in ["NOMBRE"]:
                 if len(i) == 0 or i.isspace() == True:
-                    self.error_label(f" No se ha introducido: {j} ")
+                    self.status_label.configure(text=" No se ha introducido: %s "%(j))
                     status = False
                     break
 
                 if i.isalnum() == False:
-                    self.error_label(f" Caracter invalido: {j} ")
+                    self.status_label.configure(text=" Caracter invalido: %s "%(j))                    
                     status = False
                     break
             else:
                 if len(i) == 0 or i.isspace() == True:
-                    self.error_label(f" No se ha introducido: {j} ")
+                    self.status_label.configure(text=" No se ha introducido: %s "%(j))                    
                     status = False
                     break
 
                 if i.isdigit() == False:
-                    self.error_label(f" Numero invalido: {j} ")
+                    self.status_label.configure(text=" Numero invalido: %s "%(j))                    
                     status = False
                     break
 
-
-        if status == True:
-            if self.check_repeated(name_val) == False:
-                self.add_entries_to_inventory(name_val, desc_val, cant_val,
-                                              tot1_val, tot2_val, tot3_val)
+        # Check if there is repeated values inside the database
+        if database.database_name_exist(name_val) == True:
+            self.status_label.configure(text=" El elemento %s ya existe en el inventario "%(name_val))
+        elif status == True:
+            result = database.database_add_entry(name_val, desc_val, cant_val, tot1_val, tot2_val, tot3_val)
+            if result == True:
+                self.status_label.configure(text=" Producto agregado correctamente ")
             else:
-                self.error_label(f" El elemento [{name_val.upper()}] ya esta en el inventario " )
-
-    def check_repeated(self, string):
-        """ Checkin for repeated names inside DB """
-        info = json.load(open("./DATABASE/inventory.json","r"))
-        aux = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-
-        for i in info[aux.index(string[0].upper())][string[0].upper()]:
-            if string.upper() in i:
-                return True
-        else:
-            return False
-
-
-    def add_entries_to_inventory(self, name_val, desc_val, cant_val,
-                                 tot1_val, tot2_val, tot3_val):
-        """ as its name tell us """
-        info = json.load(open("./DATABASE/inventory.json", "r"))
-        aux = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-
-        value = [ name_val.upper(), desc_val.upper(), cant_val, tot1_val,
-                  tot2_val, tot3_val ]
-
-        info[aux.index(name_val.upper()[0])][name_val[0].upper()].append(value)
-        to_write = json.dumps(info, sort_keys=True, indent=4)
-        with open("./DATABASE/inventory.json", "w") as handler:
-            handler.write(to_write)
-            self.error_label(f" [{name_val}] Agregado correctamente ")
-
-
-    def error_label(self, string):
-        self.new_window = tk.Toplevel()
-        self.error_lbl = tk.Label(self.new_window, text=string, font=("arial",12))
-        self.error_lbl.pack()
-
-        self.ok_button = tk.Button(self.new_window, text="ok", font=("arial",12), relief="groove",
-                                   borderwidth=4, command=self.new_window.destroy)
-        self.ok_button.pack()
+                self.status_label.configure(text=" Error al agregar el producto ")
 
 class remove_inventory_manager:
     def __init__(self, master):
