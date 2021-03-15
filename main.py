@@ -54,15 +54,16 @@ class MOTOS_HG_DATABASE:
                                                width=30, height=2)
         self.button_show_inventory.pack()
 
-        self.button_sales_register = tk.Button(self.main_frame, text="Facturar",
-        font="arial", command=self.sales_register, width=30, height=2)
+        self.button_sales_register = tk.Button(self.main_frame, text="Facturar", font="arial", command=self.sales_register, width=30, height=2)
         self.button_sales_register.pack()
-        self.button_add_to_inventory = tk.Button(self.main_frame, text="Agregar al inventario",
-                                                 font="arial", width=30, height=2, command=self.add_inventory)
+        self.button_add_to_inventory = tk.Button(self.main_frame, text="Agregar al inventario", font="arial", width=30, height=2, command=self.add_inventory)
         self.button_add_to_inventory.pack()
-        self.button_remove_from_inventory = tk.Button(self.main_frame, text="Quitar del inventario",
-                                                      font="arial", width=30, height=2, command=self.remove_inventory)
+        self.button_modify_inventory = tk.Button(self.main_frame, text=" Modificar inventario", font="arial", width=30, height=2, command=self.modify_inventory)
+        self.button_modify_inventory.pack()
+        self.button_remove_from_inventory = tk.Button(self.main_frame, text="Quitar del inventario", font="arial", width=30, height=2, command=self.remove_inventory)
         self.button_remove_from_inventory.pack()
+
+
         self.button_exit = tk.Button(self.main_frame, text="Salir", font="arial",
                                      command= lambda: exit_procedures(self.master),
                                      width=30, height=2)
@@ -99,6 +100,10 @@ class MOTOS_HG_DATABASE:
     def add_inventory(self):
         self.add_inventory_window = tk.Toplevel(self.master, bg="grey")
         self.app = add_inventory_manager(self.add_inventory_window)
+
+    def modify_inventory(self):
+        self.modify_inventory_window = tk.Toplevel(self.master)
+        self.app = modify_inventory_manager(self.modify_inventory_window)
 
     def remove_inventory(self):
         self.remove_inventory_window = tk.Toplevel(self.master, bg="grey")
@@ -387,7 +392,8 @@ class sales_register_manager:
             self.message_label.configure(text=" El producto no existe en el inventario")
             return 0
         else:
-            result = database.database_name_find(product_name)[0]
+            result = database.database_name_find(product_name, exact_match=True)[0]
+        print(result)
         entry_string += f"[Piezas: {product_name}], "
 
         # Check if cantidad is less or equal to what is in inventory
@@ -501,7 +507,7 @@ class add_inventory_manager:
         self.status_label = tk.Label(self.master, font=("ARIAL", 12), \
                                      text=" Presione AGREGAR para continuar ", \
                                      height=4, width=45)
-        self.status_label.pack()        
+        self.status_label.pack()
 
     def press_button(self):
         """ function handler for add button """
@@ -540,17 +546,17 @@ class add_inventory_manager:
                     break
 
                 if i.isalnum() == False:
-                    self.status_label.configure(text=" Caracter invalido: %s "%(j))                    
+                    self.status_label.configure(text=" Caracter invalido: %s "%(j))
                     status = False
                     break
             else:
                 if len(i) == 0 or i.isspace() == True:
-                    self.status_label.configure(text=" No se ha introducido: %s "%(j))                    
+                    self.status_label.configure(text=" No se ha introducido: %s "%(j))
                     status = False
                     break
 
                 if i.isdigit() == False:
-                    self.status_label.configure(text=" Numero invalido: %s "%(j))                    
+                    self.status_label.configure(text=" Numero invalido: %s "%(j))
                     status = False
                     break
 
@@ -563,6 +569,112 @@ class add_inventory_manager:
                 self.status_label.configure(text=" Producto agregado correctamente ")
             else:
                 self.status_label.configure(text=" Error al agregar el producto ")
+
+class modify_inventory_manager:
+    def __init__(self, master):
+        """ Modify an entry from the inventory """
+        """ Inventory list window initialization """
+        self.master = master
+        self.master.title("Inventory list")
+        self.master.geometry("800x200")
+        self.master.resizable(0,0)
+
+        # FRAME 1
+        self.test_frame_1 = tk.Frame(self.master)
+        self.test_frame_1.pack(fill=tk.X)
+        self.name_label = tk.Label(self.test_frame_1, relief="groove", borderwidth=2,
+                                   width=12, height=1, text="NOMBRE", font=("ARIAL", 12))
+        self.name_label.pack(side="left")
+        self.name_entry = tk.Entry(self.test_frame_1, font=("ARIAL", 12))
+        self.name_entry.pack(fill=tk.X, padx=4)
+
+        # FRAME 2
+        self.test_frame_2 = tk.Frame(self.master)
+        self.test_frame_2.pack(fill=tk.X)
+        self.desc_label = tk.Label(self.test_frame_2, relief="groove", borderwidth=2,
+                                   width=12, height=1, text="DESCRIPCION", font=("ARIAL", 12))
+        self.desc_label.pack(side="left")
+        self.desc_entry = tk.Entry(self.test_frame_2, font=("ARIAL", 12))
+        self.desc_entry.pack(fill=tk.X, padx=4)
+
+        # FRAME 3
+        self.test_frame_3 = tk.Frame(self.master)
+        self.test_frame_3.pack(fill=tk.X)
+        self.cant_label = tk.Label(self.test_frame_3, relief="groove", borderwidth=2,
+                                   width=12, height=1, text="CANTIDAD", font=("ARIAL", 12))
+        self.cant_label.pack(side="left")
+        self.cant_entry = tk.Entry(self.test_frame_3, font=("ARIAL", 12))
+        self.cant_entry.pack(fill=tk.X, padx=4)
+
+        # FRAME 4
+        self.test_frame_4 = tk.Frame(self.master)
+        self.test_frame_4.pack(fill=tk.X)
+        self.tot1_label = tk.Label(self.test_frame_4, relief="groove", borderwidth=2,
+        width=12, height=1, text="PR LLEGADA", font=("ARIAL",12))
+        self.tot1_label.pack(side="left")
+        self.tot1_entry = tk.Entry(self.test_frame_4, font=("ARIAL",12))
+        self.tot1_entry.pack(fill=tk.X, padx=4)
+
+        # FRAME 5
+        self.test_frame_5 = tk.Frame(self.master)
+        self.test_frame_5.pack(fill=tk.X)
+        self.tot2_label = tk.Label(self.test_frame_5, relief="groove", borderwidth=2,
+                                   width=12, height=1, text="PR TALLERES", font=("ARIAL",12))
+        self.tot2_label.pack(side="left")
+        self.tot2_entry = tk.Entry(self.test_frame_5, font=("ARIAL",12))
+        self.tot2_entry.pack(fill=tk.X, padx=4)
+
+        # FRAME 6
+        self.test_frame_6 = tk.Frame(self.master)
+        self.test_frame_6.pack(fill=tk.X)
+        self.tot3_label = tk.Label(self.test_frame_6, relief="groove", borderwidth=2,
+                                   width=12, height=1, text="PR PUBLICO", font=("ARIAL",12))
+        self.tot3_label.pack(side="left")
+        self.tot3_entry = tk.Entry(self.test_frame_6, font=("ARIAL",12))
+        self.tot3_entry.pack(fill=tk.X, padx=4)
+
+        # button frame
+        self.button_frame = tk.Frame(self.master)
+        self.button_frame.pack(fill=tk.X)
+        self.add_button = tk.Button(self.button_frame, text="MODIFICAR", font=("arial", 12),
+                                    relief="groove", borderwidth=6, command=self.press_button, width=8,
+                                    height=1)
+        self.add_button.pack()
+
+        self.status_label = tk.Label(self.master, font=("ARIAL", 12), \
+                                     text=" Presione MODIFICAR para continuar ", \
+                                     height=4, width=45)
+        self.status_label.pack()
+
+    def press_button(self):
+        """ function handler for add button """
+
+        status = True
+        name_val = self.name_entry.get()
+        desc_val = self.desc_entry.get()
+        cant_val = self.cant_entry.get()
+        tot1_val = self.tot1_entry.get()
+        tot2_val = self.tot2_entry.get()
+        tot3_val = self.tot3_entry.get()
+
+
+        # validating name_val
+        if len(name_val) == 0 or name_val.isspace() == True:
+            self.status_label.configure(text=" No se ha introducido nombre del producto ")
+        elif database.database_name_exist(name_val) == True:
+            if len(desc_val) != 0:
+                database.database_modify_entry(name_val, "DESCRIPCION", desc_val)
+
+            aux_list = [[cant_val,"CANTIDAD"], [tot1_val, "PR1"], [tot2_val, "PR2"], [tot3_val, "PR3"]]
+            for i,j in aux_list:
+                if len(i) != 0 and i.isdigit() == True:
+                    database.database_modify_entry(name_val, j, i)
+
+            self.status_label.configure(text=" El elemento %s fue modificado correctamente"%(name_val))
+        else:
+            self.status_label.configure(text=" El elemento %s no existe en el inventario "%(name_val))
+
+
 
 class remove_inventory_manager:
     def __init__(self, master):

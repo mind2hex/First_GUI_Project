@@ -16,7 +16,7 @@ def database_directory_check():
     """ This function create ./DATABASE directory if it doesn't exist """
     if pathlib.Path("./DATABASE").exists() == False:
         pathlib.Path("./DATABASE").mkdir()
-        
+
 def database_files_check():
     """ This function create ./DATABASE/<files> if it doesn't exist """
     if pathlib.Path("./DATABASE/inventory.json").exists() == False:
@@ -100,20 +100,24 @@ def database_routine():
     # Generating ./DATABASE/inventory.json backup if it has changed
     database_generate_backup()
 
-def database_name_find(pattern):
+def database_name_find(pattern, exact_match=False):
     """ Find all names that match with pattern
     return Values:
-      A list with the matched entries and his data
-      oterwise return Null
+      If exact_match = True, then returns the list of the exact word matched
+        otherwise returns None
+      Else return all lists that match with the pattern using re.match
     """
     lista = []
     aux = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     info = json.load(open("./DATABASE/inventory.json", "r"))
     for i in range(len(aux)):
         for j in range(len(info[i][aux[i]])):
-            if re.match(pattern, " ".join(info[i][aux[i]][j])) != None:
-                lista.append(info[i][aux[i]][j])
-
+            if exact_match == True:
+                if info[i][aux[i]][j][0] == pattern:
+                    return info[i][aux[i]][j]
+            else:
+                if re.match(pattern, " ".join(info[i][aux[i]][j])) != None:
+                    lista.append(info[i][aux[i]][j])
     return lista
 
 
@@ -132,28 +136,28 @@ def database_modify_entry(name, type, modify):
             if info[i][aux[i]][j][0] == name:
                 info[i][aux[i]][j][index] = str(modify)
 
-    
+
     handler = open("./DATABASE/inventory.json","w")
     handler.write(json.dumps(info, sort_keys=True, indent=4))
 
 def database_add_entry(name, description, cant, val1, val2, val3):
-        """ as its name tell us 
+        """ as its name tell us
         return values:
         - True  -> If There is no problem during writing on database
         - False -> If there is a problem
         """
         info = json.load(open("./DATABASE/inventory.json", "r"))
         aux = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-        
+
         value = [ name.upper(), description.upper(), \
                   cant, val1, val2, val3 ]
-        
+
         info[aux.index(name.upper()[0])][name[0].upper()].append(value)
         to_write = json.dumps(info, sort_keys=True, indent=4)
         with open("./DATABASE/inventory.json", "w") as handler:
             handler.write(to_write)
             return True
-        
+
 def database_name_exist(name):
     """ Find name in the Database
     return Values:
